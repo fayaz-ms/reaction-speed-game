@@ -20,21 +20,23 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-primary)' }}>
       {/* Header */}
-      <header className="text-center pt-8 pb-4 px-4">
+      <header className="text-center pt-12 pb-6 px-4">
         <motion.h1
-          initial={{ opacity: 0, y: -30 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-black neon-text"
+          className="text-4xl md:text-5xl font-bold tracking-tight"
+          style={{ color: 'var(--text-primary)' }}
         >
           ⚡ Reaction Speed
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-gray-400 mt-2 text-sm md:text-base"
+          transition={{ delay: 0.1 }}
+          className="mt-3 text-base md:text-lg"
+          style={{ color: 'var(--text-muted)' }}
         >
           Test your reflexes. Compete globally.
         </motion.p>
@@ -43,12 +45,14 @@ export default function Home() {
       {/* Username Input */}
       {!nameSet && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md mx-auto w-full px-4 mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md mx-auto w-full px-4 mb-8"
         >
-          <form onSubmit={handleSetName} className="glass-card p-6">
-            <label className="block text-sm text-gray-400 mb-2">Enter your nickname</label>
+          <form onSubmit={handleSetName} className="card p-6">
+            <label className="block text-sm mb-2" style={{ color: 'var(--text-muted)' }}>
+              Enter your nickname
+            </label>
             <div className="flex gap-3">
               <input
                 type="text"
@@ -56,12 +60,19 @@ export default function Home() {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Player name..."
                 maxLength={20}
-                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{
+                  background: 'var(--bg-card-secondary)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                  '--tw-ring-color': 'var(--accent)',
+                  '--tw-ring-offset-color': 'var(--bg-primary)',
+                }}
               />
               <button
                 type="submit"
                 disabled={username.trim().length < 2}
-                className="btn-neon disabled:opacity-40 disabled:cursor-not-allowed"
+                className="btn-primary"
               >
                 Play
               </button>
@@ -72,20 +83,21 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 px-4 pb-8">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             {nameSet && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 className="mb-4 flex items-center justify-between"
               >
-                <span className="text-sm text-gray-400">
-                  Playing as <span className="text-cyan-400 font-bold">{username}</span>
+                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Playing as <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{username}</span>
                 </span>
                 <button
                   onClick={() => setNameSet(false)}
-                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                  className="text-xs transition-colors hover:underline"
+                  style={{ color: 'var(--text-muted)' }}
                 >
                   Change name
                 </button>
@@ -100,7 +112,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-gray-600 text-sm border-t border-white/5">
+      <footer className="text-center py-6 text-sm border-t" style={{ color: 'var(--text-muted)', borderColor: 'var(--border)' }}>
         <p>Auth – Fayazahmad_Siddik</p>
       </footer>
     </div>
