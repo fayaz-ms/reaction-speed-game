@@ -20,7 +20,7 @@ A modern, addictive browser game to test your reaction speed. Compete on a globa
 | Frontend  | React, Vite, TailwindCSS |
 | Animation | Framer Motion          |
 | Backend   | Vercel Serverless Functions |
-| Database  | PostgreSQL             |
+| Database  | Neon PostgreSQL (Cloud) |
 | Testing   | Vitest                 |
 
 ## Getting Started
@@ -40,6 +40,18 @@ npm install
 
 ### Database Setup
 
+**Option 1: Use Neon (Recommended)**
+
+1. Create a free account at [neon.tech](https://neon.tech)
+2. Create a new project
+3. Copy the connection string
+4. Run the migration:
+   ```bash
+   node migrate.js
+   ```
+
+**Option 2: Local PostgreSQL**
+
 Run the schema against your PostgreSQL database:
 
 ```bash
@@ -53,6 +65,8 @@ Create a `.env` file:
 ```
 DATABASE_URL=postgresql://user:password@host:5432/dbname
 ```
+
+For Neon, use the connection string from your Neon dashboard.
 
 ### Development
 
@@ -97,7 +111,50 @@ reaction-speed-game/
 ├── api/                # Vercel serverless functions
 ├── db/                 # PostgreSQL schema
 ├── tests/              # Unit and UI tests
+├── migrate.js          # Database migration script
+├── test-apis.js        # API testing script
 └── public/             # Static assets
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/submitScore` | POST | Submit player reaction time |
+| `/api/getLeaderboard` | GET | Get top players (limit=10) |
+
+**Example Usage:**
+
+```javascript
+// Submit score
+fetch('/api/submitScore', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username: 'Player1', reaction_time_ms: 245 })
+});
+
+// Get leaderboard
+fetch('/api/getLeaderboard?limit=10');
+```
+
+## Live Deployment
+
+**🚀 Live Site:** https://reaction-speed-game-kohl.vercel.app
+
+**📊 Database:** Neon PostgreSQL (ap-southeast-1)
+
+**🔗 GitHub:** https://github.com/fayaz-ms/reaction-speed-game
+
+## Testing
+
+Run the test suite:
+```bash
+npm test
+```
+
+Test API endpoints:
+```bash
+node test-apis.js
 ```
 
 ## Auth
