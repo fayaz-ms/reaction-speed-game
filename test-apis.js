@@ -1,3 +1,6 @@
+// ⚠️ WARNING: DO NOT RUN THIS IN PRODUCTION!
+// This script inserts test data into the production database.
+// Only use this for development/testing purposes.
 // Test the deployed APIs with Neon database
 const API_BASE = 'https://reaction-speed-game-kohl.vercel.app/api';
 
