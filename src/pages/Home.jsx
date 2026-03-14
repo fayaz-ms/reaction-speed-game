@@ -26,8 +26,12 @@ export default function Home() {
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-bold tracking-tight"
-          style={{ color: 'var(--text-primary)' }}
+          className="font-bold"
+          style={{ 
+            color: 'var(--text-primary)',
+            fontSize: '36px',
+            letterSpacing: '-0.5px'
+          }}
         >
           ⚡ Reaction Speed
         </motion.h1>
@@ -35,10 +39,13 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="mt-3 text-base md:text-lg"
-          style={{ color: 'var(--text-muted)' }}
+          className="mt-3"
+          style={{ 
+            color: 'var(--text-muted)',
+            fontSize: '16px'
+          }}
         >
-          Test your reflexes. Compete globally.
+          Test your reflexes and compete globally.
         </motion.p>
       </header>
 

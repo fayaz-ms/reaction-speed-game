@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
 import { getRandomDelay, formatTime, getRating } from '../lib/utils';
 import { submitScore } from '../lib/db';
 
@@ -24,23 +23,6 @@ const clickSound = () => {
     osc.start();
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
     osc.stop(ctx.currentTime + 0.1);
-  } catch {}
-};
-
-const successSound = () => {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [523, 659, 784].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = freq;
-      gain.gain.value = 0.08;
-      osc.start(ctx.currentTime + i * 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.2);
-      osc.stop(ctx.currentTime + i * 0.12 + 0.2);
-    });
   } catch {}
 };
 
@@ -91,7 +73,7 @@ export default function Game({ username, onScoreSubmit }) {
       const elapsed = Math.round(performance.now() - startTimeRef.current);
       setReactionTime(elapsed);
       setGameState(GAME_STATES.RESULT);
-      successSound();
+      clickSound();
 
       const newScores = [elapsed, ...scores].slice(0, 5);
       setScores(newScores);
@@ -100,12 +82,6 @@ export default function Game({ username, onScoreSubmit }) {
       if (isNew) {
         setPersonalBest(elapsed);
         setIsNewRecord(true);
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#39ff14', '#00f0ff', '#b026ff', '#ff006e'],
-        });
       }
 
       if (username) {
@@ -121,19 +97,19 @@ export default function Game({ username, onScoreSubmit }) {
 
   const getBgColor = () => {
     switch (gameState) {
-      case GAME_STATES.WAITING: return '#991b1b';
-      case GAME_STATES.READY: return '#15803d';
-      case GAME_STATES.TOO_EARLY: return '#a16207';
-      default: return '#1e293b';
+      case GAME_STATES.WAITING: return '#7f1d1d'; // Dark red
+      case GAME_STATES.READY: return '#14532d'; // Dark green
+      case GAME_STATES.TOO_EARLY: return '#713f12'; // Dark yellow
+      default: return 'var(--bg-card)';
     }
   };
 
   const getMessage = () => {
     switch (gameState) {
-      case GAME_STATES.IDLE: return 'Click to Start';
-      case GAME_STATES.WAITING: return 'Wait for GREEN...';
+      case GAME_STATES.IDLE: return 'Click to start';
+      case GAME_STATES.WAITING: return 'Wait for green...';
       case GAME_STATES.READY: return 'CLICK NOW!';
-      case GAME_STATES.TOO_EARLY: return 'Too Early! Click to retry';
+      case GAME_STATES.TOO_EARLY: return 'Too early! Click to retry';
       case GAME_STATES.RESULT: return 'Click to play again';
       default: return '';
     }
@@ -143,34 +119,39 @@ export default function Game({ username, onScoreSubmit }) {
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
-      {/* Game Area */}
+      {/* Game Area - Fullscreen Responsive */}
       <motion.div
-        className="card relative overflow-hidden cursor-pointer select-none min-h-[340px] flex flex-col items-center justify-center p-8"
+        className="card relative overflow-hidden cursor-pointer select-none flex flex-col items-center justify-center p-8"
         onClick={handleClick}
-        whileTap={{ scale: 0.99 }}
+        whileTap={{ scale: 0.995 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        style={{ background: getBgColor() }}
+        style={{ 
+          background: getBgColor(),
+          minHeight: '400px',
+          border: gameState === GAME_STATES.IDLE || gameState === GAME_STATES.RESULT ? '1px solid var(--border)' : 'none'
+        }}
       >
         <AnimatePresence mode="wait">
           <motion.div
             key={gameState}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.15 }}
             className="text-center"
           >
             {gameState === GAME_STATES.RESULT && reactionTime !== null ? (
               <div className="space-y-5">
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 200 }}
                   style={{
-                    fontSize: '72px',
+                    fontSize: '80px',
                     fontWeight: 700,
-                    letterSpacing: '-1px',
+                    letterSpacing: '-2px',
                     color: 'var(--text-primary)',
+                    lineHeight: 1
                   }}
                 >
                   {formatTime(reactionTime)}
@@ -180,19 +161,25 @@ export default function Game({ username, onScoreSubmit }) {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.1 }}
-                    className="text-xl font-semibold"
-                    style={{ color: 'var(--text-muted)' }}
+                    style={{ 
+                      fontSize: '20px',
+                      fontWeight: 600,
+                      color: 'var(--text-muted)'
+                    }}
                   >
                     {rating.emoji} {rating.label}
                   </motion.div>
                 )}
                 {isNewRecord && (
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: 'spring', delay: 0.2 }}
-                    className="text-base font-semibold"
-                    style={{ color: 'var(--success)' }}
+                    style={{ 
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      color: 'var(--success)'
+                    }}
                   >
                     🎉 New Personal Best!
                   </motion.div>
@@ -205,7 +192,13 @@ export default function Game({ username, onScoreSubmit }) {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="text-2xl md:text-3xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                <div 
+                  style={{ 
+                    fontSize: '24px',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)'
+                  }}
+                >
                   {getMessage()}
                 </div>
                 {gameState === GAME_STATES.WAITING && (

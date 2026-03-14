@@ -30,7 +30,11 @@ export default function Leaderboard({ refreshKey }) {
   return (
     <div className="card p-0 overflow-hidden">
       <div className="p-6 border-b" style={{ borderColor: 'var(--border)' }}>
-        <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+        <h2 className="flex items-center gap-2" style={{ 
+          fontSize: '18px',
+          fontWeight: 600,
+          color: 'var(--text-primary)'
+        }}>
           🏆 Global Leaderboard
         </h2>
       </div>
@@ -88,7 +92,6 @@ export default function Leaderboard({ refreshKey }) {
                   style={{
                     flex: '0 0 100px',
                     textAlign: 'right',
-                    fontFamily: "'Courier New', monospace",
                     fontWeight: 600,
                     color: 'var(--success)',
                   }}
