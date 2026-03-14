@@ -7,12 +7,29 @@ export default function Home() {
   const [username, setUsername] = useState('');
   const [nameSet, setNameSet] = useState(false);
   const [leaderboardKey, setLeaderboardKey] = useState(0);
+  const [validationError, setValidationError] = useState('');
 
   const handleSetName = (e) => {
     e.preventDefault();
-    if (username.trim().length >= 2) {
-      setNameSet(true);
+    const trimmedUsername = username.trim();
+    
+    if (trimmedUsername.length === 0) {
+      setValidationError('Please enter a nickname to start the game.');
+      return;
     }
+    
+    if (trimmedUsername.length < 3) {
+      setValidationError('Nickname must be at least 3 characters.');
+      return;
+    }
+    
+    if (trimmedUsername.length > 20) {
+      setValidationError('Nickname must be maximum 20 characters.');
+      return;
+    }
+    
+    setValidationError('');
+    setNameSet(true);
   };
 
   const handleScoreSubmit = useCallback(() => {
@@ -64,7 +81,10 @@ export default function Home() {
               <input
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setValidationError('');
+                }}
                 placeholder="Player name..."
                 maxLength={20}
                 className="flex-1 px-4 py-2.5 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
@@ -78,12 +98,23 @@ export default function Home() {
               />
               <button
                 type="submit"
-                disabled={username.trim().length < 2}
+                disabled={username.trim().length < 3}
                 className="btn-primary"
               >
                 Play
               </button>
             </div>
+            {validationError && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 text-sm flex items-center gap-2"
+                style={{ color: '#ef4444' }}
+              >
+                <span>⚠</span>
+                <span>{validationError}</span>
+              </motion.div>
+            )}
           </form>
         </motion.div>
       )}

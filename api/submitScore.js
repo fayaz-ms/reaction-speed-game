@@ -36,8 +36,19 @@ export default async function handler(req, res) {
 
   const { username, reaction_time_ms } = req.body;
 
-  if (!username || typeof username !== 'string' || username.trim().length < 2 || username.trim().length > 50) {
-    return res.status(400).json({ error: 'Invalid username' });
+  // Check if nickname is missing or empty
+  if (!username || typeof username !== 'string' || username.trim().length === 0) {
+    return res.status(400).json({ error: 'Nickname is required' });
+  }
+
+  // Validate nickname length (3-20 characters)
+  const trimmedUsername = username.trim();
+  if (trimmedUsername.length < 3) {
+    return res.status(400).json({ error: 'Nickname must be at least 3 characters' });
+  }
+  
+  if (trimmedUsername.length > 20) {
+    return res.status(400).json({ error: 'Nickname must be maximum 20 characters' });
   }
 
   const time = parseInt(reaction_time_ms, 10);
@@ -45,7 +56,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid reaction time' });
   }
 
-  const sanitizedUsername = username.trim().slice(0, 50);
+  const sanitizedUsername = trimmedUsername.slice(0, 20);
   const db = getPool();
 
   if (!db) {
