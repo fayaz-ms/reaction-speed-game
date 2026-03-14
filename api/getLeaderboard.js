@@ -4,7 +4,19 @@ const { Pool } = pg;
 
 let pool;
 
+// In-memory fallback store (shared with submitScore via global)
+const memoryStore = {
+  players: new Map(),
+  scores: [],
+};
+
+// Make memoryStore globally accessible for serverless
+if (!globalThis.__memoryStore) {
+  globalThis.__memoryStore = memoryStore;
+}
+
 function getPool() {
+  if (!process.env.DATABASE_URL) return null;
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -25,9 +37,27 @@ export default async function handler(req, res) {
   const limitParam = parseInt(req.query.limit, 10);
   const limit = Number.isFinite(limitParam) && limitParam > 0 && limitParam <= 100 ? limitParam : 10;
 
-  try {
-    const db = getPool();
+  const db = getPool();
 
+  if (!db) {
+    // In-memory fallback leaderboard
+    const store = globalThis.__memoryStore || memoryStore;
+    const playerBests = new Map();
+    for (const score of store.scores) {
+      const cur = playerBests.get(score.username);
+      if (!cur || score.reaction_time_ms < cur) {
+        playerBests.set(score.username, score.reaction_time_ms);
+      }
+    }
+    const leaderboard = Array.from(playerBests.entries())
+      .map(([username, best_time]) => ({ username, best_time }))
+      .sort((a, b) => a.best_time - b.best_time)
+      .slice(0, limit)
+      .map((entry, i) => ({ ...entry, rank: i + 1 }));
+    return res.status(200).json(leaderboard);
+  }
+
+  try {
     const result = await db.query(
       `SELECT
         ROW_NUMBER() OVER (ORDER BY MIN(s.reaction_time_ms) ASC) AS rank,

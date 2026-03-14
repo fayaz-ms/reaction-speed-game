@@ -4,7 +4,19 @@ const { Pool } = pg;
 
 let pool;
 
+// In-memory fallback store when DATABASE_URL is not set
+const memoryStore = {
+  players: new Map(),
+  scores: [],
+};
+
+// Make memoryStore globally accessible for serverless
+if (!globalThis.__memoryStore) {
+  globalThis.__memoryStore = memoryStore;
+}
+
 function getPool() {
+  if (!process.env.DATABASE_URL) return null;
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -34,10 +46,22 @@ export default async function handler(req, res) {
   }
 
   const sanitizedUsername = username.trim().slice(0, 50);
+  const db = getPool();
+
+  if (!db) {
+    // In-memory fallback
+    const store = globalThis.__memoryStore || memoryStore;
+    if (!store.players.has(sanitizedUsername)) {
+      store.players.set(sanitizedUsername, { scores: [] });
+    }
+    const player = store.players.get(sanitizedUsername);
+    player.scores.push(time);
+    store.scores.push({ username: sanitizedUsername, reaction_time_ms: time, created_at: new Date() });
+    const best = Math.min(...player.scores);
+    return res.status(200).json({ success: true, best_time: best });
+  }
 
   try {
-    const db = getPool();
-
     // Upsert player
     const playerResult = await db.query(
       `INSERT INTO players (username) VALUES ($1)
